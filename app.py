@@ -13,3 +13,7 @@ def UseCase():
 @app.route('/Mendez')
 def UseCaseM():
     return render_template('UseCase_Mendez.html')
+
+@app.route('/Cuitiva')
+def UseCaseC():
+    return render_template('UseCase_Cuitiva.html')
