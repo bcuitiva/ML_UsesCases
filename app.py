@@ -9,3 +9,7 @@ def home():
 @app.route('/Almonacid')
 def UseCase():
     return render_template('UseCase_Almonacid.html')
+
+@app.route('/Mendez')
+def UseCaseM():
+    return render_template('UseCase_Mendez.html')
