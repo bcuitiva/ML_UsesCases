@@ -32,10 +32,6 @@ def UseCase3():
 def UseCase4():
     return render_template('useCase_Group.html')
 
-@app.route('/Group')
-def UseCase4():
-    return render_template('useCase_Group.html')
-
 @app.route('/lRMenu')
 def linearRM():
     return render_template('linearRegressionMenu.html')
