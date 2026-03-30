@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ridge Classifier — Basic Concepts</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #f5f4f0;
+      --surface: #ffffff;
+      --border:  #d9d7d0;
+      --text:    #111110;
+      --muted:   #7a7870;
+      --radius:  4px;
+      --mono:    'IBM Plex Mono', monospace;
+      --sans:    'IBM Plex Sans', sans-serif;
+      --tr:      0.22s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; display: flex; flex-direction: column; max-width: 720px; margin: 0 auto; width: 100%; padding: 5rem 1.5rem 3rem; }
+
+    .back-link { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 3rem; transition: color var(--tr); }
+    .back-link:hover { color: var(--text); }
+
+    header { margin-bottom: 4rem; }
+    .eyebrow { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.1rem; }
+    h1 { font-family: var(--mono); font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; color: var(--text); margin-bottom: 0.6rem; }
+    .subtitle { font-family: var(--sans); font-size: 1rem; font-weight: 300; color: var(--muted); }
+    .rule { width: 32px; height: 1px; background: var(--text); margin: 1.6rem 0 0; }
+
+    .section-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; margin-top: 2.5rem; }
+
+    /* Content block */
+    .content-block { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 1.4rem 1.6rem; margin-bottom: 0.5rem; }
+    .block-title { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); margin-bottom: 0.7rem; }
+    .content-block p { font-size: 0.9rem; font-weight: 300; color: var(--text); line-height: 1.75; margin-bottom: 0.5rem; }
+    .content-block p:last-child { margin-bottom: 0; }
+    .content-block ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .content-block ul li { font-size: 0.88rem; font-weight: 300; color: var(--text); padding-left: 1.4rem; position: relative; line-height: 1.6; }
+    .content-block ul li::before { content: '—'; position: absolute; left: 0; color: var(--muted); font-family: var(--mono); font-size: 0.75rem; }
+    .content-block ul li strong { font-weight: 500; }
+
+    /* Formula */
+    .formula-block { border: 1px solid var(--text); border-radius: var(--radius); background: var(--text); padding: 1.4rem 1.6rem; margin-bottom: 0.5rem; text-align: center; }
+    .formula { font-family: var(--mono); font-size: clamp(0.9rem, 2.5vw, 1.25rem); font-weight: 600; color: var(--bg); letter-spacing: 0.03em; margin-bottom: 0.75rem; }
+    .formula-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.4rem 1.2rem; }
+    .formula-item { font-family: var(--mono); font-size: 0.68rem; color: rgba(245,244,240,0.5); }
+    .formula-item span { color: rgba(245,244,240,0.9); }
+
+    /* Two col advantages/limitations */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .col-block { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 1.2rem 1.4rem; }
+    .col-label { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .col-block ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+    .col-block ul li { font-size: 0.83rem; font-weight: 300; color: var(--text); padding-left: 1.1rem; position: relative; line-height: 1.5; }
+    .col-block ul li::before { content: '—'; position: absolute; left: 0; color: var(--muted); font-family: var(--mono); font-size: 0.72rem; }
+
+    /* Alpha param card */
+    .alpha-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 1.2rem 1.4rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 1.4rem; }
+    .alpha-symbol { font-family: var(--mono); font-size: 2.2rem; font-weight: 600; color: var(--text); flex-shrink: 0; line-height: 1; }
+    .alpha-body { display: flex; flex-direction: column; gap: 0.25rem; }
+    .alpha-name { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .alpha-desc { font-size: 0.85rem; font-weight: 300; color: var(--text); line-height: 1.55; }
+
+    /* Problems grid */
+    .problems-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .problem-item { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 1rem 1.2rem; }
+    .problem-key { font-family: var(--mono); font-size: 0.57rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+    .problem-val { font-size: 0.85rem; font-weight: 400; color: var(--text); line-height: 1.45; }
+
+    /* Real-world example */
+    .example-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; }
+    .example-cell { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 0.9rem 1rem; }
+    .example-key { font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.3rem; }
+    .example-val { font-size: 0.85rem; font-weight: 400; color: var(--text); line-height: 1.4; }
+
+    footer { margin-top: 4rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+    .footer-label { font-family: var(--mono); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+    .members { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1.4rem; }
+    .member { font-size: 0.88rem; font-weight: 400; color: var(--text); }
+    .university { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.08em; color: var(--muted); }
+
+    @media (max-width: 520px) {
+      .page { padding: 3rem 1.2rem 2rem; }
+      .two-col, .problems-grid, .example-grid { grid-template-columns: 1fr; }
+      .alpha-card { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a href="{{ url_for('RCMenu') }}" class="back-link">&#8592; Ridge Classifier</a>
+
+  <header>
+    <p class="eyebrow">Assigned Model &middot; Theory</p>
+    <h1>Basic Concepts</h1>
+    <p class="subtitle">Understanding the Ridge Classifier — regularization applied to supervised classification</p>
+    <div class="rule"></div>
+  </header>
+
+  <main>
+
+    <!-- 01 What the model is -->
+    <p class="section-label">01 &mdash; What is the Ridge Classifier?</p>
+    <div class="content-block">
+      <p>The <strong>Ridge Classifier</strong> is a supervised machine learning model that adapts Ridge Regression — a regularized linear method — for classification tasks. Instead of predicting a continuous value, it assigns each input to a discrete class label.</p>
+      <p>It works by converting class labels into numerical values and fitting a regularized linear model. The class with the highest predicted score is chosen as the output. Scikit-learn implements it via <code>sklearn.linear_model.RidgeClassifier</code>.</p>
+    </div>
+
+    <!-- 02 How it works -->
+    <p class="section-label">02 &mdash; How it works</p>
+    <div class="content-block">
+      <p>The model minimizes a cost function that combines two terms: the standard prediction error and an <strong>L2 regularization penalty</strong> that shrinks the model's coefficients toward zero. This prevents any single feature from dominating the prediction.</p>
+    </div>
+
+    <div class="formula-block">
+      <p class="formula">min &nbsp; ‖Xw − y‖² + α ‖w‖²</p>
+      <div class="formula-legend">
+        <span class="formula-item"><span>X</span> — input features</span>
+        <span class="formula-item"><span>w</span> — model coefficients</span>
+        <span class="formula-item"><span>y</span> — class labels (encoded)</span>
+        <span class="formula-item"><span>α</span> — regularization strength</span>
+        <span class="formula-item"><span>‖w‖²</span> — L2 penalty</span>
+      </div>
+    </div>
+
+    <div class="alpha-card">
+      <span class="alpha-symbol">α</span>
+      <div class="alpha-body">
+        <span class="alpha-name">Regularization parameter (alpha)</span>
+        <span class="alpha-desc">Controls how much the model is penalized for large coefficients. A higher α produces a simpler, more constrained model. A lower α behaves more like standard linear regression. Choosing the right α is key to balancing bias and variance.</span>
+      </div>
+    </div>
+
+    <div class="content-block">
+      <p class="block-title">Classification step</p>
+      <p>After solving the linear system, the model computes a score for each class. For binary problems it applies a threshold; for multiclass problems it uses a <strong>one-vs-rest strategy</strong> — one classifier per class — and assigns the label with the highest score.</p>
+    </div>
+
+    <!-- 03 Main characteristics -->
+    <p class="section-label">03 &mdash; Main Characteristics</p>
+    <div class="content-block">
+      <ul>
+        <li><strong>Linear model:</strong> finds a linear decision boundary between classes.</li>
+        <li><strong>L2 regularization:</strong> shrinks coefficients to reduce overfitting without eliminating features entirely.</li>
+        <li><strong>No probability output:</strong> unlike Logistic Regression, it does not produce class probabilities — only the predicted label.</li>
+        <li><strong>Closed-form solution:</strong> solves directly using matrix algebra, making it very fast to train even on large datasets.</li>
+        <li><strong>Multiclass support:</strong> handles problems with more than two classes natively via one-vs-rest.</li>
+        <li><strong>Single hyperparameter:</strong> α is the only parameter to tune, making it simple to configure.</li>
+      </ul>
+    </div>
+
+    <!-- 04 Advantages and limitations -->
+    <p class="section-label">04 &mdash; Advantages and Limitations</p>
+    <div class="two-col">
+      <div class="col-block">
+        <p class="col-label">Advantages</p>
+        <ul>
+          <li>Very fast training — no iterative optimization needed</li>
+          <li>Effective when features are correlated (multicollinearity)</li>
+          <li>Stable and robust on high-dimensional data</li>
+          <li>Simple to implement and interpret</li>
+          <li>Works well with few training samples</li>
+        </ul>
+      </div>
+      <div class="col-block">
+        <p class="col-label">Limitations</p>
+        <ul>
+          <li>Assumes a linear relationship between features and classes</li>
+          <li>Does not output class probabilities</li>
+          <li>Poor performance on non-linearly separable data</li>
+          <li>Sensitive to feature scaling — normalization is required</li>
+          <li>Not ideal when feature selection is needed (use Lasso instead)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 05 Classification problems -->
+    <p class="section-label">05 &mdash; Applicable Classification Problems</p>
+    <div class="problems-grid">
+      <div class="problem-item">
+        <p class="problem-key">Binary classification</p>
+        <p class="problem-val">Two-class problems — spam vs. not spam, disease vs. healthy.</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-key">Multiclass classification</p>
+        <p class="problem-val">Multiple categories — document topics, obesity levels, product types.</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-key">High-dimensional data</p>
+        <p class="problem-val">Text classification, genomics — many features, few samples.</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-key">Correlated features</p>
+        <p class="problem-val">Datasets where input variables are highly related to each other.</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-key">Speed-critical scenarios</p>
+        <p class="problem-val">Applications that require fast training with minimal tuning.</p>
+      </div>
+      <div class="problem-item">
+        <p class="problem-key">Small datasets</p>
+        <p class="problem-val">Regularization helps avoid overfitting when data is limited.</p>
+      </div>
+    </div>
+
+    <!-- 06 Real-world example -->
+    <p class="section-label">06 &mdash; Real-World Example</p>
+    <div class="content-block">
+        <p class="block-title">News article topic classification</p>
+        <p>A Ridge Classifier can be trained to automatically categorize news articles into topics — such as <strong>Politics, Technology, Sports, or Economy</strong> — based on word frequency features extracted from the text. Each article is represented as a vector of thousands of word counts, making this a high-dimensional problem where L2 regularization is especially effective.</p>
+    </div>
+    <div class="example-grid">
+        <div class="example-cell">
+            <p class="example-key">Input (X)</p>
+            <p class="example-val">Word frequency vectors extracted from article text</p>
+        </div>
+    <div class="example-cell">
+        <p class="example-key">Output (Y)</p>
+        <p class="example-val">Article category — Politics, Tech, Sports, Economy</p>
+    </div>
+    <div class="example-cell">
+        <p class="example-key">Why Ridge?</p>
+        <p class="example-val">Thousands of correlated word features, fast multiclass training needed</p>
+    </div>
+    </div>
+    <div class="content-block">
+        <p class="block-title">Other industries where it is applied</p>
+            <ul>
+                <li><strong>Finance:</strong> classifying credit risk — low, medium, or high — from applicant data.</li>
+                <li><strong>E-commerce:</strong> categorizing products into catalog sections from title and description.</li>
+                <li><strong>Education:</strong> predicting student performance level from behavioral and academic features.</li>
+                <li><strong>Bioinformatics:</strong> gene expression classification with thousands of correlated features.</li>
+            </ul>
+    </div>
+
+  </main>
+
+  <footer>
+    <p class="footer-label">Group Members</p>
+    <div class="members">
+      <span class="member">Elkin Yamith Almonacid López</span>
+      <span class="member">Brayan David Cuitiva Umbarila</span>
+      <span class="member">Brayan Yair Mendez Rodriguez</span>
+    </div>
+    <p class="university">Universidad de Cundinamarca</p>
+  </footer>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
