@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from LinearRegression_Weight import (predecir_peso, actual_values, predicted_values)
 import LinearRegression_Weight
+import logisticRegressionDiabetes
 
 app = Flask(__name__)
 
@@ -15,6 +16,10 @@ def firstPage():
 @app.route('/useCases')
 def useCases():
     return render_template('useCases.html')
+
+@app.route('/supervisedML')
+def supervisedML():
+    return render_template('supervisedML.html')
 
 @app.route('/Almonacid')
 def UseCase1():
@@ -75,3 +80,36 @@ def linearRW():
     )
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/logisticRMenu')
+def logisticRM():
+    return render_template('logisticRegressionMenu.html')
+
+@app.route('/logisticRConcepts')
+def logisticRC():
+    return render_template('logisticRegressionConcepts.html')
+
+@app.route('/logisticRApplication', methods=["GET", "POST"])
+def applicationLR():
+    result = None
+    prob = None
+
+    if request.method == "POST":
+        pregnancies = int(request.form["pregnancies"])
+        glucose = float(request.form["glucose"])
+        bloodpressure = float(request.form["bloodpressure"])
+        skinthickness = float(request.form["skinthickness"])
+        insulin = float(request.form["insulin"])
+        bmi = float(request.form["bmi"])
+        dpf = float(request.form["dpf"])
+        age = int(request.form["age"])
+
+        pred, probability = logisticRegressionDiabetes.predecir_diabetes(
+            pregnancies, glucose, bloodpressure, skinthickness,
+            insulin, bmi, dpf, age
+        )
+
+        result = "Diabetic" if pred == 1 else "Not diabetic"
+        prob = round(probability * 100, 2)
+
+    return render_template('logisticRegressionApplication.html', result=result, prob=prob)
